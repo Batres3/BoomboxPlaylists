@@ -1,0 +1,8 @@
+# Directories
+.git/
+bin/
+obj/
+
+#Files
+*.csproj
+*.csproj.user
