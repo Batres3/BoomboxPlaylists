@@ -17,6 +17,8 @@ namespace BoomboxPlaylists.Managers
 
         public static bool finishedLoading = false;
 
+        public static int currentSongID = 0;
+
         private static readonly string directory = Path.Combine(BepInEx.Paths.BepInExRootPath, "Custom Playlists");
 
         public static event Action OnAllSongsLoaded;
@@ -119,12 +121,13 @@ namespace BoomboxPlaylists.Managers
 
         public static void ApplyClips(ref BoomboxItem __istance)
         {
-            __istance.musicAudios = playlistManagers[currentPlaylistID].clips.ToArray();
             currentPlaylistID++;
             if (currentPlaylistID >= playlistManagers.Count)
             {
                 currentPlaylistID = 0;
             }
+            currentSongID = 0;
+            __istance.musicAudios = playlistManagers[currentPlaylistID].clips.ToArray();
         }
 
         public static void SetTooltip(ref BoomboxItem __instance)
@@ -152,6 +155,23 @@ namespace BoomboxPlaylists.Managers
         public static void SetVolume(ref BoomboxItem __instance)
         {
             __instance.boomboxAudio.volume = volume;
+        }
+
+        public static void NextSong(ref BoomboxItem __instance, ref bool startMusic)
+        {
+            if (startMusic)
+            {
+                currentSongID++;
+                if (currentSongID >= playlistManagers[currentPlaylistID].clips.Count)
+                {
+                    currentSongID = 0;
+                }
+                __instance.boomboxAudio.clip = __instance.musicAudios[currentSongID];
+                __instance.boomboxAudio.pitch = 1f;
+                __instance.boomboxAudio.Play();
+                startMusic = false;
+            }
+
         }
     }
 }
