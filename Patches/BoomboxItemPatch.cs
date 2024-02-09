@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using BoomboxPlaylists.Managers;
 using UnityEngine;
+using System.Reflection;
 
 namespace BoomboxPlaylists.Patches
 {
@@ -29,19 +30,25 @@ namespace BoomboxPlaylists.Patches
         }
 
         [HarmonyPatch("StartMusic")]
-        [HarmonyPostfix]
-        private static void StartMusic_Postfix(BoomboxItem __instance)
+        [HarmonyPrefix]
+        private static void StartMusic_Postfix(BoomboxItem __instance, bool startMusic)
         {
-            AudioManager.SetTooltip(ref __instance);
             AudioManager.SetVolume(ref __instance);
+            AudioManager.NextSong(ref __instance, ref startMusic);
         }
 
         [HarmonyPatch("PocketItem")]
-        [HarmonyPostfix]
-        private static void PocketItem_Postfix(BoomboxItem __instance)
+        [HarmonyPrefix]
+        private static bool PocketItem_Postfix(BoomboxItem __instance)
         {
             AudioManager.ApplyClips(ref __instance);
-
+            AudioManager.SetTooltip(ref __instance);
+            GrabbableObject component = __instance.GetComponent<GrabbableObject>();
+            if (component != null)
+            {
+                component.EnableItemMeshes(enable: false);
+            }
+            return false;
         }
 
         [HarmonyPatch("Update")]
